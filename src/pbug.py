@@ -3,6 +3,7 @@ import os
 import tempfile
 import subprocess
 import platform
+import csv
 
 
 # CONSTANTS #
@@ -12,6 +13,7 @@ DB_ENV_VAR = 'PBUG_PROJECT'
 MISSING_ENV_VARIABLE = '$' + DB_ENV_VAR + ' is not set in environment'
 FILE_ALREADY_EXISTS = 'The database file specified in $' + DB_ENV_VAR + ' already exists'
 NO_EDITOR = 'No sane default for an editor available'
+INCORRECT_FORMAT = '''Task wasn't formatted correctly'''
 
 
 def write_task_template(file_pointer):
@@ -37,15 +39,41 @@ def get_editor():
             exit(NO_EDITOR)
 
 
-def add_task():
-    '''Add task to database'''
+def get_new_task():
+    '''Open temporary file to get task information'''
+    # Open temporary file to get information on task
     with tempfile.NamedTemporaryFile(delete=False) as temp:
         write_task_template(temp)
+
+    # Start editor so user can edit informaiton
     subprocess.run([get_editor(), temp.name])
+
+    # Get task information
+    lines = []
     with open(temp.name, 'r') as temp:
         for line in temp:
-            print(line, end='')
-    return
+            lines.append(line.strip())
+
+    # Delete temporary file
+    os.remove(temp.name)
+    return lines
+
+
+def add_task():
+    '''Add task to database'''
+    task_info = get_new_task()
+
+    task_dict = {}
+    try:
+        task_dict['id'] = int(task_info[0].split(':')[1].strip())
+        task_dict['priority'] = int(task_info[1].split(':')[1].strip())
+        task_dict['state'] = task_info[2].split(':')[1].strip()
+        task_dict['subject'] = task_info[3].split(':')[1].strip()
+        task_dict['description'] = os.linesep.join(task_info[5:])
+    except ValueError as e:
+        exit(INCORRECT_FORMAT)
+
+    # TODO save to file
 
 
 def edit_task():
@@ -82,8 +110,6 @@ def create_database(db):
 def parse_args(args):
     '''Parse arguments given to program and decide what to do'''
     if args.cmd == 'create':
-        if DB_ENV_VAR not in os.environ.keys():
-            exit(MISSING_ENV_VARIABLE)
         db = os.environ[DB_ENV_VAR]
         if os.path.isfile(db):
             exit(FILE_ALREADY_EXISTS)
@@ -109,6 +135,8 @@ def main():
                         'database, add task, edit task, delete task')
     args = parser.parse_args()
 
+    if DB_ENV_VAR not in os.environ.keys():
+        exit(MISSING_ENV_VARIABLE)
     parse_args(args)
     return
 
