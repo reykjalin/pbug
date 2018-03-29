@@ -1,6 +1,7 @@
 import argparse
 import os
 import tempfile
+import subprocess
 
 
 # CONSTANTS #
@@ -11,10 +12,25 @@ MISSING_ENV_VARIABLE = '$' + DB_ENV_VAR + ' is not set in environment'
 FILE_ALREADY_EXISTS = 'The database file specified in $' + DB_ENV_VAR + ' already exists'
 
 
+def write_task_template(file_pointer):
+    file_pointer.write('Id: 0')
+    file_pointer.write('Priority: ')
+    file_pointer.write('State: ')
+    file_pointer.write('Subject: ')
+    file_pointer.write('-- Description below --')
+
+
 def add_task():
-    fp = tempfile.TemporaryFile()
-    print(fp.name)
-    fp.close()
+    with tempfile.TemporaryFile() as temp:
+        temp.write(b'Id: 0\n')
+        temp.write(b'Priority: \n')
+        temp.write(b'State: \n')
+        temp.write(b'Subject: \n')
+        temp.write(b'-- Description below --\n')
+        temp.seek(0)
+        subprocess.run(['nvim', temp.name])
+        for line in temp.read().decode():
+            print(line, end='')
     return
 
 
