@@ -24,6 +24,8 @@ def write_task_template(file_pointer):
 
 
 def get_editor():
+    '''Attempt to find a sane default for text editor if $EDITOR environment
+    variable is not defined'''
     if 'EDITOR' in os.environ.keys():
         return os.environ['EDITOR']
     else:
@@ -36,6 +38,7 @@ def get_editor():
 
 
 def add_task():
+    '''Add task to database'''
     with tempfile.NamedTemporaryFile(delete=False) as temp:
         write_task_template(temp)
     subprocess.run([get_editor(), temp.name])
