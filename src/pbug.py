@@ -69,11 +69,17 @@ def add_task():
         task_dict['priority'] = int(task_info[1].split(':')[1].strip())
         task_dict['state'] = task_info[2].split(':')[1].strip()
         task_dict['subject'] = task_info[3].split(':')[1].strip()
-        task_dict['description'] = os.linesep.join(task_info[5:])
+        task_dict['description'] = '\n'.join(task_info[5:])
     except ValueError as e:
         exit(INCORRECT_FORMAT)
 
-    # TODO save to file
+    # TODO Figure out how to get \n into csv file
+    field_names = ['id', 'priority', 'state', 'subject', 'description']
+    db = os.environ[DB_ENV_VAR]
+    with open(db, 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=field_names,
+                                dialect='excel-tab')
+        writer.writerow(task_dict)
 
 
 def edit_task():
@@ -88,8 +94,14 @@ def delete_task(id):
     return
 
 
-def list_tasks(id):
-    return
+def list_tasks():
+    db = os.environ[DB_ENV_VAR]
+    field_names = ['id', 'priority', 'state', 'subject', 'description']
+    with open(db, newline='') as csvfile:
+        reader = csv.DictReader(csvfile, fieldnames=field_names, 
+                                                    dialect='excel-tab')
+        for row in reader:
+            print(row['description'])
 
 
 def touch(path):
@@ -123,7 +135,7 @@ def parse_args(args):
     elif args.cmd == 'delete':
         print('delete')
     elif args.cmd == 'list':
-        print('list')
+        list_tasks()
 
 
 def main():
