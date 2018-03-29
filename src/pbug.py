@@ -2,6 +2,7 @@ import argparse
 import os
 import tempfile
 import subprocess
+import platform
 
 
 # CONSTANTS #
@@ -10,26 +11,36 @@ DB_ENV_VAR = 'PBUG_PROJECT'
 # EXIT MESSAGES #
 MISSING_ENV_VARIABLE = '$' + DB_ENV_VAR + ' is not set in environment'
 FILE_ALREADY_EXISTS = 'The database file specified in $' + DB_ENV_VAR + ' already exists'
+NO_EDITOR = 'No sane default for an editor available'
 
 
 def write_task_template(file_pointer):
-    file_pointer.write('Id: 0')
-    file_pointer.write('Priority: ')
-    file_pointer.write('State: ')
-    file_pointer.write('Subject: ')
-    file_pointer.write('-- Description below --')
+    file_pointer.write(b'Id: 0' + bytes(os.linesep, 'utf-8'))
+    file_pointer.write(b'Priority: ' + bytes(os.linesep, 'utf-8'))
+    file_pointer.write(b'State: ' + bytes(os.linesep, 'utf-8'))
+    file_pointer.write(b'Subject: ' + bytes(os.linesep, 'utf-8'))
+    file_pointer.write(b'-- Description below --' + bytes(os.linesep, 'utf-8'))
+    file_pointer.seek(0)
+
+
+def get_editor():
+    if 'EDITOR' in os.environ.keys():
+        return os.environ['EDITOR']
+    else:
+        if platform.system() == 'Windows':
+            return 'notepad'
+        elif platform.system() == 'Linux':
+            return 'ed'
+        else:
+            exit(NO_EDITOR)
 
 
 def add_task():
-    with tempfile.TemporaryFile() as temp:
-        temp.write(b'Id: 0\n')
-        temp.write(b'Priority: \n')
-        temp.write(b'State: \n')
-        temp.write(b'Subject: \n')
-        temp.write(b'-- Description below --\n')
-        temp.seek(0)
-        subprocess.run(['nvim', temp.name])
-        for line in temp.read().decode():
+    with tempfile.NamedTemporaryFile(delete=False) as temp:
+        write_task_template(temp)
+    subprocess.run([get_editor(), temp.name])
+    with open(temp.name, 'r') as temp:
+        for line in temp:
             print(line, end='')
     return
 
