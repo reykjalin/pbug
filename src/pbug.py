@@ -25,11 +25,11 @@ def parse_args(args):
     elif args.list:
         task_service.list_tasks()
     elif args.edit is not None:
-        print('edit')
+        print('Work in progress...')
     elif args.view is not None:
         task_service.view_task(args.view)
     elif args.delete is not None:
-        print('delete')
+        print('Work in progress...')
 
 
 def main():
