@@ -32,6 +32,9 @@ class Task():
         except ValueError as err:
             exit(INCORRECT_FORMAT)
 
+        if self.state == '' or self.subject == '':
+            exit(INCORRECT_FORMAT)
+
     def from_dict(self, task_dict):
         try:
             self.id = int(task_dict['id'])
@@ -40,6 +43,9 @@ class Task():
             self.subject = task_dict['subject']
             self.description = task_dict['description']
         except ValueError as err:
+            exit(INCORRECT_FORMAT)
+
+        if self.state == '' or self.subject == '':
             exit(INCORRECT_FORMAT)
 
     def to_task_list_row(self):
