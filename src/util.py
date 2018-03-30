@@ -41,6 +41,6 @@ def read_csv_file(file_name, field_names):
     return task_list
 
 
-def linesep_bytes():
-    return bytes(os.linesep, 'utf-8')
+def str_to_bytes(string):
+    return bytes(string, 'utf-8')
 
