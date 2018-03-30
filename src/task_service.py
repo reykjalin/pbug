@@ -15,11 +15,14 @@ INCORRECT_FORMAT = '''Task wasn't formatted correctly'''
 
 
 def write_task_template(file_pointer):
-    file_pointer.write(b'Id: 0' + util.linesep_bytes())
-    file_pointer.write(b'Priority: ' + util.linesep_bytes())
-    file_pointer.write(b'State: ' + util.linesep_bytes())
-    file_pointer.write(b'Subject: ' + util.linesep_bytes())
-    file_pointer.write(b'-- Description below --' + util.linesep_bytes())
+    file_pointer.write(b'Id: ' +
+                       util.str_to_bytes(str(db_service.get_next_id())) +
+                       util.str_to_bytes(os.linesep))
+    file_pointer.write(b'Priority: 0' + util.str_to_bytes(os.linesep))
+    file_pointer.write(b'State: open' + util.str_to_bytes(os.linesep))
+    file_pointer.write(b'Subject: ' + util.str_to_bytes(os.linesep))
+    file_pointer.write(b'-- Description below --' +
+                       util.str_to_bytes(os.linesep))
     file_pointer.seek(0)
 
 
