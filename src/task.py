@@ -1,4 +1,5 @@
 import os
+import sys
 
 # EXIT MESSAGES #
 INCORRECT_FORMAT = '''Task wasn't formatted correctly'''
@@ -30,10 +31,10 @@ class Task():
             self.subject = task_list[3].split(':')[1].strip()
             self.description = os.linesep.join(task_list[5:])
         except ValueError as err:
-            exit(INCORRECT_FORMAT)
+            sys.exit(INCORRECT_FORMAT)
 
         if self.state == '' or self.subject == '':
-            exit(INCORRECT_FORMAT)
+            sys.exit(INCORRECT_FORMAT)
 
     def from_dict(self, task_dict):
         try:
@@ -43,10 +44,10 @@ class Task():
             self.subject = task_dict['subject']
             self.description = task_dict['description']
         except ValueError as err:
-            exit(INCORRECT_FORMAT)
+            sys.exit(INCORRECT_FORMAT)
 
         if self.state == '' or self.subject == '':
-            exit(INCORRECT_FORMAT)
+            sys.exit(INCORRECT_FORMAT)
 
     def to_task_list_row(self):
         ret = str(self.id) + '\t' + str(self.priority) + '\t'
