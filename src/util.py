@@ -1,4 +1,5 @@
 import os
+import sys
 import platform
 import csv
 
@@ -25,7 +26,7 @@ def get_editor():
         elif platform.system() == 'Linux':
             return 'ed'
         else:
-            exit(NO_EDITOR)
+            sys.exit(NO_EDITOR)
 
 
 def read_csv_file(file_name, field_names):

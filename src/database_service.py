@@ -1,4 +1,5 @@
 import os
+import sys
 import csv
 from operator import attrgetter
 
@@ -27,7 +28,7 @@ def find_task_by_id(task_list, task_id):
         if task.id == task_id:
             return task
 
-    exit(NO_TASK_WITH_ID + str(task_id))
+    sys.exit(NO_TASK_WITH_ID + str(task_id))
 
 
 def get_tasks_from_db():

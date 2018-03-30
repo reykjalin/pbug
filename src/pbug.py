@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 
 import database_service as db_service
 import task_service as task_service
@@ -18,7 +19,7 @@ def parse_args(args):
     if args.create:
         db = os.environ[DB_ENV_VAR]
         if os.path.isfile(db):
-            exit(FILE_ALREADY_EXISTS)
+            sys.exit(FILE_ALREADY_EXISTS)
         db_service.create_database(db)
     elif args.add:
         task_service.add_task()
@@ -44,7 +45,7 @@ def main():
     args = parser.parse_args()
 
     if DB_ENV_VAR not in os.environ.keys():
-        exit(MISSING_ENV_VARIABLE)
+        sys.exit(MISSING_ENV_VARIABLE)
     parse_args(args)
     return
 
