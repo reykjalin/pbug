@@ -4,6 +4,7 @@ import tempfile
 import subprocess
 import platform
 import csv
+from operator import itemgetter
 
 
 # CONSTANTS #
@@ -64,21 +65,25 @@ def add_task():
     task_info = get_new_task()
 
     task_dict = {}
+    task_dict['id'] = task_info[0].split(':')[1].strip()
+    task_dict['priority'] = task_info[1].split(':')[1].strip()
+    task_dict['state'] = task_info[2].split(':')[1].strip()
+    task_dict['subject'] = task_info[3].split(':')[1].strip()
+    task_dict['description'] = os.linesep.join(task_info[5:])
+
+    # Make sure Id and Priority are numbers
     try:
-        task_dict['id'] = int(task_info[0].split(':')[1].strip())
-        task_dict['priority'] = int(task_info[1].split(':')[1].strip())
-        task_dict['state'] = task_info[2].split(':')[1].strip()
-        task_dict['subject'] = task_info[3].split(':')[1].strip()
-        task_dict['description'] = '\n'.join(task_info[5:])
+        int(task_dict['id'])
+        int(task_dict['priority'])
     except ValueError as e:
         exit(INCORRECT_FORMAT)
 
     # TODO Figure out how to get \n into csv file
     field_names = ['id', 'priority', 'state', 'subject', 'description']
     db = os.environ[DB_ENV_VAR]
-    with open(db, 'w', newline='') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=field_names,
-                                dialect='excel-tab')
+    with open(db, 'a', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, dialect='excel-tab',
+                                fieldnames=field_names)
         writer.writerow(task_dict)
 
 
@@ -94,14 +99,40 @@ def delete_task(id):
     return
 
 
+def read_csv_file(file_name, field_names):
+    '''Read CSV file and return a list of dicts with CSV data'''
+    dict_list = []
+    with open(file_name, newline='') as csvfile:
+        reader = csv.DictReader(csvfile, fieldnames=field_names,
+                                dialect='excel-tab')
+        for row in reader:
+            dict_list.append(row)
+    return dict_list
+
+
+def print_task_list(dict_list):
+    '''Print list of tasks given a list of dicts with task information'''
+    print('Id\tPrior.\tState\tSubject')
+    for item in dict_list:
+        for key in item.keys():
+            if key is not 'description':
+                print(item[key], end='\t')
+        # Print new line character
+        print()
+
+
 def list_tasks():
+    '''Print list of tasks in database'''
+    # Read DB
     db = os.environ[DB_ENV_VAR]
     field_names = ['id', 'priority', 'state', 'subject', 'description']
-    with open(db, newline='') as csvfile:
-        reader = csv.DictReader(csvfile, fieldnames=field_names, 
-                                                    dialect='excel-tab')
-        for row in reader:
-            print(row['description'])
+    dict_list = read_csv_file(db, field_names)
+
+    # Sort items in DB by priority
+    sorted_dict_list = sorted(dict_list, key=itemgetter('priority'))
+
+    # Print items in DB
+    print_task_list(sorted_dict_list)
 
 
 def touch(path):
