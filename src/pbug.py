@@ -15,6 +15,15 @@ MISSING_ENV_VARIABLE = '$' + DB_ENV_VAR + ' is not set in environment'
 FILE_ALREADY_EXISTS = 'The database file specified in $' + DB_ENV_VAR + ' already exists'
 NO_EDITOR = 'No sane default for an editor available'
 INCORRECT_FORMAT = '''Task wasn't formatted correctly'''
+NO_TASK_WITH_ID = '''No task with ID: '''
+
+
+def print_task(task):
+    print('Id: ' + task['id'])
+    print('Priority: ' + task['priority'])
+    print('State: ' + task['state'])
+    print('-- Description Below --')
+    print(task['description'])
 
 
 def write_task_template(file_pointer):
@@ -87,18 +96,6 @@ def add_task():
         writer.writerow(task_dict)
 
 
-def edit_task():
-    return
-
-
-def view_task():
-    return
-
-
-def delete_task(id):
-    return
-
-
 def read_csv_file(file_name, field_names):
     '''Read CSV file and return a list of dicts with CSV data'''
     dict_list = []
@@ -108,6 +105,14 @@ def read_csv_file(file_name, field_names):
         for row in reader:
             dict_list.append(row)
     return dict_list
+
+
+def find_task_in_list_by_id(task_list, task_id):
+    for task in task_list:
+        if int(task['id']) == task_id:
+            return task
+
+    exit(NO_TASK_WITH_ID + str(task_id))
 
 
 def print_task_list(dict_list):
@@ -135,6 +140,26 @@ def list_tasks():
     print_task_list(sorted_dict_list)
 
 
+def edit_task():
+    return
+
+
+def view_task(task_id):
+    # Read DB
+    db = os.environ[DB_ENV_VAR]
+    field_names = ['id', 'priority', 'state', 'subject', 'description']
+    dict_list = read_csv_file(db, field_names)
+
+    task = find_task_in_list_by_id(dict_list, task_id)
+    print_task(task)
+
+    return
+
+
+def delete_task(id):
+    return
+
+
 def touch(path):
     '''Create empty file'''
     with open(path, 'a'):
@@ -152,30 +177,32 @@ def create_database(db):
 
 def parse_args(args):
     '''Parse arguments given to program and decide what to do'''
-    if args.cmd == 'create':
+    if args.create:
         db = os.environ[DB_ENV_VAR]
         if os.path.isfile(db):
             exit(FILE_ALREADY_EXISTS)
         create_database(db)
-    elif args.cmd == 'add':
+    elif args.add:
         add_task()
-    elif args.cmd == 'edit':
-        print('edit')
-    elif args.cmd == 'view':
-        print('view')
-    elif args.cmd == 'delete':
-        print('delete')
-    elif args.cmd == 'list':
+    elif args.list:
         list_tasks()
+    elif args.edit is not None:
+        print('edit')
+    elif args.view is not None:
+        view_task(args.view)
+    elif args.delete is not None:
+        print('delete')
 
 
 def main():
     '''Main function'''
-    choice_list = ['create', 'add', 'edit', 'delete', 'list', 'view']
     parser = argparse.ArgumentParser()
-    parser.add_argument('cmd', choices=choice_list,
-                        help='command stating which action to take: create ' +
-                        'database, add task, edit task, delete task')
+    parser.add_argument('-c', '--create', action='store_true')
+    parser.add_argument('-a', '--add', action='store_true')
+    parser.add_argument('-l', '--list', action='store_true')
+    parser.add_argument('-e', '--edit', type=int)
+    parser.add_argument('-v', '--view', type=int)
+    parser.add_argument('-d', '--delete', type=int)
     args = parser.parse_args()
 
     if DB_ENV_VAR not in os.environ.keys():
