@@ -14,23 +14,16 @@ DB_ENV_VAR = 'PBUG_PROJECT'
 INCORRECT_FORMAT = '''Task wasn't formatted correctly'''
 
 
-def write_task_template(file_pointer):
-    file_pointer.write(b'Id: ' +
-                       util.str_to_bytes(str(db_service.get_next_id())) +
-                       util.str_to_bytes(os.linesep))
-    file_pointer.write(b'Priority: 0' + util.str_to_bytes(os.linesep))
-    file_pointer.write(b'State: open' + util.str_to_bytes(os.linesep))
-    file_pointer.write(b'Subject: ' + util.str_to_bytes(os.linesep))
-    file_pointer.write(b'-- Description below --' +
-                       util.str_to_bytes(os.linesep))
-    file_pointer.seek(0)
-
-
 def get_new_task():
     '''Open temporary file to get task information'''
+    # Prepare task
+    task = Task()
+    task.id = db_service.get_next_id()
+    task.priority = 0
+
     # Open temporary file to get information on task
     with tempfile.NamedTemporaryFile(delete=False) as temp:
-        write_task_template(temp)
+        util.write_task_to_binary_file(temp, task)
 
     # Start editor so user can edit informaiton
     subprocess.run([util.get_editor(), temp.name])
