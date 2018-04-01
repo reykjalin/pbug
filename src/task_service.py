@@ -88,5 +88,10 @@ def view_task(task_id):
 
 
 def delete_task(task_id):
-    return
+    # Read DB
+    db = os.environ[DB_ENV_VAR]
+    db_service = DatabaseService(db)
+    if db_service.find_task_by_id(task_id) is None:
+        sys.exit(NO_SUCH_TASK + str(task_id))
+    db_service.delete_task_by_id(task_id)
 

@@ -58,6 +58,12 @@ class DatabaseService():
             task.from_tuple(row)
             return task
 
+    def delete_task_by_id(self, task_id):
+        cmd = 'delete from tasks where id = ?'
+        id_tuple = (task_id, )
+        self.conn.execute(cmd, id_tuple)
+        self.conn.commit()
+
     def close(self):
         self.conn.close()
 

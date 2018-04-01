@@ -31,7 +31,8 @@ def parse_args(args):
     elif args.view is not None:
         task_service.view_task(args.view)
     elif args.delete is not None:
-        print('Work in progress...')
+        task_service.delete_task(args.delete)
+        print('Successfully deleted task with ID: ' + str(args.delete))
 
 
 def main():
