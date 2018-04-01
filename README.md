@@ -22,7 +22,7 @@ optional arguments:
 ```
 
 1. Make sure the environment variable `PBUG_PROJECT` is set to a .db file
-  * For your first time use, the file does not have to exist
+    * For your first time use, the file does not have to exist
 2. If this is the first time running the program you have to initialize the database:
 ```bash
 python pbug.py -i
