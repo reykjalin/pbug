@@ -27,7 +27,8 @@ def parse_args(args):
     elif args.list:
         task_service.list_tasks()
     elif args.edit is not None:
-        print('Work in progress...')
+        task_service.edit_task(args.edit)
+        print('Successfully edited task with ID: ' + str(args.edit))
     elif args.view is not None:
         task_service.view_task(args.view)
     elif args.delete is not None:

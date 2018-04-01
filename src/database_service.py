@@ -58,6 +58,17 @@ class DatabaseService():
             task.from_tuple(row)
             return task
 
+    def update_task(self, task):
+        cmd = 'update tasks '
+        cmd += 'set priority = ?, '
+        cmd += 'status = ?, '
+        cmd += 'subject = ?, '
+        cmd += 'description = ? '
+        cmd += 'where id = ?'
+        cmd_tuple = task.to_tuple() + (task.id, )
+        self.conn.execute(cmd, cmd_tuple)
+        self.conn.commit()
+
     def delete_task_by_id(self, task_id):
         cmd = 'delete from tasks where id = ?'
         id_tuple = (task_id, )

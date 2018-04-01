@@ -16,14 +16,7 @@ NOT_INT = '''Value provided was not an integer'''
 NO_SUCH_TASK = '''No task with ID: '''
 
 
-def get_new_task():
-    '''Open temporary file to get task information'''
-    # Prepare task
-    task = Task()
-    # task.id = db_service.get_next_id()
-    task.id = 0
-    task.priority = 0
-
+def edit_temp_task(task):
     # Open temporary file to get information on task
     with tempfile.NamedTemporaryFile(delete=False) as temp:
         util.write_task_to_binary_file(temp, task)
@@ -39,9 +32,22 @@ def get_new_task():
 
     # Delete temporary file
     os.remove(temp.name)
+
+    # Create new task
     new_task = Task()
     new_task.from_list(lines)
     return new_task
+
+
+def get_new_task():
+    '''Open temporary file to get task information'''
+    # Prepare task
+    task = Task()
+    task.id = 0
+    task.priority = 0
+
+    # Get task inforrmation
+    return edit_temp_task(task)
 
 
 def add_task():
@@ -51,9 +57,9 @@ def add_task():
     # field_names = ['id', 'priority', 'state', 'subject', 'description']
     db = os.environ[DB_ENV_VAR]
     db_service = DatabaseService(db)
-    print(new_task.to_tuple())
+
+    # Add task to DB
     db_service.add_task(new_task)
-    # db_service.write_task_to_csv(db, field_names, new_task)
 
 
 def print_task_list(task_list):
@@ -71,8 +77,16 @@ def list_tasks():
     print_task_list(db_service.get_all_tasks())
 
 
-def edit_task():
-    return
+def edit_task(task_id):
+    # Read DB
+    db = os.environ[DB_ENV_VAR]
+    db_service = DatabaseService(db)
+    task = db_service.find_task_by_id(task_id)
+    if task is None:
+        sys.exit(NO_SUCH_TASK + str(task_id))
+
+    task = edit_temp_task(task)
+    db_service.update_task(task)
 
 
 def view_task(task_id):
