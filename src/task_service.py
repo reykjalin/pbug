@@ -114,3 +114,16 @@ def delete_task(task_id):
         sys.exit(NO_SUCH_TASK + str(task_id))
     db_service.delete_task_by_id(task_id)
 
+def close_task(task_id):
+    db = os.environ[DB_ENV_VAR]
+    db_service = DatabaseService(db)
+    task = db_service.find_task_by_id(task_id)
+    if task is None:
+        sys.exit(NO_SUCH_TASK + str(task_id))
+
+    if task.priority > 0:
+        task.priority = -task.priority
+    task.state = 'closed'
+
+    db_service.update_task(task)
+

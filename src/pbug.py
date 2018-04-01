@@ -34,6 +34,9 @@ def parse_args(args):
     elif args.delete is not None:
         task_service.delete_task(args.delete)
         print('Successfully deleted task with ID: ' + str(args.delete))
+    elif args.close is not None:
+        task_service.close_task(args.close)
+        print('Successfully closed task with ID: ' + str(args.close))
 
 
 def main():
