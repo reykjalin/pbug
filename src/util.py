@@ -45,3 +45,10 @@ def read_csv_file(file_name, field_names):
 def str_to_bytes(string):
     return bytes(string, 'utf-8')
 
+
+def write_str_to_binary_file(stream, string):
+    stream.write(str_to_bytes(string))
+
+
+def write_task_to_binary_file(stream, task):
+    write_str_to_binary_file(stream, str(task))

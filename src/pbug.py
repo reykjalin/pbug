@@ -2,7 +2,7 @@ import argparse
 import os
 import sys
 
-import database_service as db_service
+from database_service import DatabaseService
 import task_service as task_service
 
 
@@ -16,11 +16,12 @@ FILE_ALREADY_EXISTS = 'The database file specified in $' + DB_ENV_VAR + ' alread
 
 def parse_args(args):
     '''Parse arguments given to program and decide what to do'''
-    if args.create:
+    if args.init:
         db = os.environ[DB_ENV_VAR]
         if os.path.isfile(db):
             sys.exit(FILE_ALREADY_EXISTS)
-        db_service.create_database(db)
+        DatabaseService(db)
+        print('Successfully initialized database')
     elif args.add:
         task_service.add_task()
     elif args.list:
@@ -36,12 +37,20 @@ def parse_args(args):
 def main():
     '''Main function'''
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--create', action='store_true')
-    parser.add_argument('-a', '--add', action='store_true')
-    parser.add_argument('-l', '--list', action='store_true')
-    parser.add_argument('-e', '--edit', type=int)
-    parser.add_argument('-v', '--view', type=int)
-    parser.add_argument('-d', '--delete', type=int)
+    parser.add_argument('-i', '--init', action='store_true',
+                        help='Initialize database')
+    parser.add_argument('-a', '--add', action='store_true',
+                        help='Add new task')
+    parser.add_argument('-l', '--list', action='store_true',
+                        help='List all available tasks')
+    parser.add_argument('-e', '--edit', type=int,
+                        help='Edit the task specified by the ID nr. EDIT')
+    parser.add_argument('-v', '--view', type=int,
+                        help='View the task specified by the ID nr. VIEW')
+    parser.add_argument('-d', '--delete', type=int,
+                        help='Delete the task specified by the ID nr. DELETE')
+    parser.add_argument('-c', '--close', type=int,
+                        help='Close the task specified by the ID nr. DELETE')
     args = parser.parse_args()
 
     if DB_ENV_VAR not in os.environ.keys():
