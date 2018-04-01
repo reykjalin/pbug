@@ -1,10 +1,10 @@
 import os
+import sys
 import tempfile
 import subprocess
-from operator import attrgetter
 
 import util
-import database_service as db_service
+from database_service import DatabaseService
 from task import Task
 
 # CONSTANTS #
@@ -12,25 +12,15 @@ DB_ENV_VAR = 'PBUG_PROJECT'
 
 # EXIT MESSAGES #
 INCORRECT_FORMAT = '''Task wasn't formatted correctly'''
+NOT_INT = '''Value provided was not an integer'''
+NO_SUCH_TASK = '''No task with ID: '''
 
 
-def write_task_template(file_pointer):
-    file_pointer.write(b'Id: ' +
-                       util.str_to_bytes(str(db_service.get_next_id())) +
-                       util.str_to_bytes(os.linesep))
-    file_pointer.write(b'Priority: 0' + util.str_to_bytes(os.linesep))
-    file_pointer.write(b'State: open' + util.str_to_bytes(os.linesep))
-    file_pointer.write(b'Subject: ' + util.str_to_bytes(os.linesep))
-    file_pointer.write(b'-- Description below --' +
-                       util.str_to_bytes(os.linesep))
-    file_pointer.seek(0)
-
-
-def get_new_task():
-    '''Open temporary file to get task information'''
+def edit_temp_task(task):
+    '''Open temporary file to edit the given task'''
     # Open temporary file to get information on task
     with tempfile.NamedTemporaryFile(delete=False) as temp:
-        write_task_template(temp)
+        util.write_task_to_binary_file(temp, task)
 
     # Start editor so user can edit informaiton
     subprocess.run([util.get_editor(), temp.name])
@@ -43,18 +33,34 @@ def get_new_task():
 
     # Delete temporary file
     os.remove(temp.name)
+
+    # Create new task
     new_task = Task()
     new_task.from_list(lines)
     return new_task
+
+
+def get_new_task():
+    '''Open temporary file to get task information'''
+    # Prepare task
+    task = Task()
+    task.id = 0
+    task.priority = 0
+
+    # Get task inforrmation
+    return edit_temp_task(task)
 
 
 def add_task():
     '''Add task to database'''
     new_task = get_new_task()
 
-    field_names = ['id', 'priority', 'state', 'subject', 'description']
+    # field_names = ['id', 'priority', 'state', 'subject', 'description']
     db = os.environ[DB_ENV_VAR]
-    db_service.write_task_to_csv(db, field_names, new_task)
+    db_service = DatabaseService(db)
+
+    # Add task to DB
+    db_service.add_task(new_task)
 
 
 def print_task_list(task_list):
@@ -68,32 +74,43 @@ def list_tasks():
     '''Print list of tasks in database'''
     # Read DB
     db = os.environ[DB_ENV_VAR]
-    field_names = ['id', 'priority', 'state', 'subject', 'description']
-    task_list = util.read_csv_file(db, field_names)
-
-    # Sort items in DB by priority
-    sorted_task_list = sorted(task_list, key=attrgetter('priority'), reverse=True)
-
-    # Print items in DB
-    print_task_list(sorted_task_list)
+    db_service = DatabaseService(db)
+    print_task_list(db_service.get_all_tasks())
 
 
-def edit_task():
-    return
+def edit_task(task_id):
+    '''Edit task with given ID'''
+    # Read DB
+    db = os.environ[DB_ENV_VAR]
+    db_service = DatabaseService(db)
+    task = db_service.find_task_by_id(task_id)
+    if task is None:
+        sys.exit(NO_SUCH_TASK + str(task_id))
+
+    modified_task = edit_temp_task(task)
+    modified_task.id = task.id
+    db_service.update_task(modified_task)
 
 
 def view_task(task_id):
+    '''View details about task with given ID'''
     # Read DB
     db = os.environ[DB_ENV_VAR]
-    field_names = ['id', 'priority', 'state', 'subject', 'description']
-    task_list = util.read_csv_file(db, field_names)
+    db_service = DatabaseService(db)
 
-    task = db_service.find_task_by_id(task_list, task_id)
-    print(task)
-
-    return
+    task = db_service.find_task_by_id(task_id)
+    if task is not None:
+        print(task)
+    else:
+        sys.exit(NO_SUCH_TASK + str(task_id))
 
 
 def delete_task(task_id):
-    return
+    '''Delete task with given ID'''
+    # Read DB
+    db = os.environ[DB_ENV_VAR]
+    db_service = DatabaseService(db)
+    if db_service.find_task_by_id(task_id) is None:
+        sys.exit(NO_SUCH_TASK + str(task_id))
+    db_service.delete_task_by_id(task_id)
 
