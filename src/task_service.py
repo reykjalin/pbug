@@ -17,6 +17,7 @@ NO_SUCH_TASK = '''No task with ID: '''
 
 
 def edit_temp_task(task):
+    '''Open temporary file to edit the given task'''
     # Open temporary file to get information on task
     with tempfile.NamedTemporaryFile(delete=False) as temp:
         util.write_task_to_binary_file(temp, task)
@@ -78,6 +79,7 @@ def list_tasks():
 
 
 def edit_task(task_id):
+    '''Edit task with given ID'''
     # Read DB
     db = os.environ[DB_ENV_VAR]
     db_service = DatabaseService(db)
@@ -85,11 +87,13 @@ def edit_task(task_id):
     if task is None:
         sys.exit(NO_SUCH_TASK + str(task_id))
 
-    task = edit_temp_task(task)
-    db_service.update_task(task)
+    modified_task = edit_temp_task(task)
+    modified_task.id = task.id
+    db_service.update_task(modified_task)
 
 
 def view_task(task_id):
+    '''View details about task with given ID'''
     # Read DB
     db = os.environ[DB_ENV_VAR]
     db_service = DatabaseService(db)
@@ -102,6 +106,7 @@ def view_task(task_id):
 
 
 def delete_task(task_id):
+    '''Delete task with given ID'''
     # Read DB
     db = os.environ[DB_ENV_VAR]
     db_service = DatabaseService(db)

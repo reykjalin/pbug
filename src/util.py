@@ -51,4 +51,5 @@ def write_str_to_binary_file(stream, string):
 
 
 def write_task_to_binary_file(stream, task):
-    write_str_to_binary_file(stream, str(task))
+    task_str = os.linesep.join(str(task).split(os.linesep)[1:])
+    write_str_to_binary_file(stream, task_str)

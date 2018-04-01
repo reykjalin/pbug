@@ -25,11 +25,10 @@ class Task():
 
     def from_list(self, task_list):
         try:
-            self.id = int(task_list[0].split(':')[1].strip())
-            self.priority = int(task_list[1].split(':')[1].strip())
-            self.state = task_list[2].split(':')[1].strip()
-            self.subject = task_list[3].split(':')[1].strip()
-            self.description = os.linesep.join(task_list[5:])
+            self.priority = int(task_list[0].split(':')[1].strip())
+            self.state = task_list[1].split(':')[1].strip()
+            self.subject = task_list[2].split(':')[1].strip()
+            self.description = os.linesep.join(task_list[4:])
         except ValueError as err:
             sys.exit(INCORRECT_FORMAT)
 
