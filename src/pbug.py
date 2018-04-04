@@ -26,6 +26,10 @@ def parse_args(args):
         task_service.add_task()
     elif args.list:
         task_service.list_tasks()
+    elif args.list_open:
+        task_service.list_open_tasks()
+    elif args.list_priority is not None:
+        task_service.list_tasks_with_priority(args.list_priority)
     elif args.edit is not None:
         task_service.edit_task(args.edit)
         print('Successfully edited task with ID: ' + str(args.edit))
@@ -48,6 +52,10 @@ def main():
                         help='Add new task')
     parser.add_argument('-l', '--list', action='store_true',
                         help='List all available tasks')
+    parser.add_argument('-lo', '--list-open', action='store_true',
+                        help='List all open tasks')
+    parser.add_argument('-lp', '--list-priority', type=int,
+                        help='List all tasks with the priority LIST_PRIORITY')
     parser.add_argument('-e', '--edit', type=int,
                         help='Edit the task specified by the ID nr. EDIT')
     parser.add_argument('-v', '--view', type=int,

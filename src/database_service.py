@@ -49,6 +49,33 @@ class DatabaseService():
             task_list.append(task)
         return task_list
 
+    def get_open_tasks(self):
+        '''Return a list of all open tasks stored in DB'''
+        task_list = []
+        cmd = 'select id, priority, status, subject, description from tasks '
+        cmd += 'where status = ? '
+        cmd += 'order by priority desc'
+        status_tuple = ('open', )
+        for row in self.conn.execute(cmd, status_tuple):
+            task = Task()
+            task.from_tuple(row)
+            task_list.append(task)
+        return task_list
+
+    def get_tasks_with_priority(self, priority):
+        '''Return a list of all tasks with priority "priority" stored in DB'''
+        task_list = []
+        cmd = 'select id, priority, status, subject, description from tasks '
+        cmd += 'where priority = ? '
+        cmd += 'order by id asc'
+        priority_tuple = (priority, )
+        for row in self.conn.execute(cmd, priority_tuple):
+            task = Task()
+            task.from_tuple(row)
+            task_list.append(task)
+        return task_list
+
+
     def find_task_by_id(self, task_id):
         cmd = 'select id, priority, status, subject, description from tasks '
         cmd += 'where id = ?'

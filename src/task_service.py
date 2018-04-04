@@ -46,6 +46,7 @@ def get_new_task():
     task = Task()
     task.id = 0
     task.priority = 0
+    task.state = 'open'
 
     # Get task inforrmation
     return edit_temp_task(task)
@@ -76,6 +77,22 @@ def list_tasks():
     db = os.environ[DB_ENV_VAR]
     db_service = DatabaseService(db)
     print_task_list(db_service.get_all_tasks())
+
+
+def list_open_tasks():
+    '''Print list of open tasks in database'''
+    # Read DB
+    db = os.environ[DB_ENV_VAR]
+    db_service = DatabaseService(db)
+    print_task_list(db_service.get_open_tasks())
+
+
+def list_tasks_with_priority(priority):
+    '''Print list of tasks with the given priority'''
+    # Read DB
+    db = os.environ[DB_ENV_VAR]
+    db_service = DatabaseService(db)
+    print_task_list(db_service.get_tasks_with_priority(priority))
 
 
 def edit_task(task_id):
